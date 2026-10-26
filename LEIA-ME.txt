@@ -15,7 +15,7 @@ COMO USAR
 - Rádios: toque em "Buscar rádios na internet" para procurar por nome, país ou estilo; use "Ouvir" para
   testar e "+ Adicionar" para guardar na sua lista. A busca usa o diretório público Radio Browser
   (precisa de internet). Também dá para "+ Adicionar pelo link" (nome + link da transmissão).
-  Nenhuma rádio vem pré-cadastrada.
+  Já vêm cadastradas a Paraíso Surf e a Rede Jovem Hits; se você apagar uma, ela não volta sozinha.
 - Cores: em Ajustes, escolha Verde (padrão), Laranja, Azul, Claro ou Alto contraste.
 - Músicas: toque em "+ Adicionar músicas" e escolha os MP3 do aparelho. Ficam guardados dentro do app
   e tocam sem internet. (No PC há também "Adicionar pasta".)

@@ -43,6 +43,23 @@ const state = {
 const saveSettings = () => store.set('sc.settings', state.settings);
 const saveStations = () => store.set('sc.stations', state.stations);
 
+// Rádios que já vêm cadastradas. Cada uma entra uma única vez: se você apagar, não volta.
+const DEFAULT_STATIONS = [
+  { name: 'Paraíso Surf (Porto Alegre/RS)', url: 'https://superaudio.radio.br/stream/paraisosurf' },
+  { name: 'Rede Jovem Hits (Uruguaiana/RS)', url: 'https://sv11.hdradios.net:7528/stream' }
+];
+function seedDefaultStations() {
+  const seeded = new Set(store.get('sc.seeded', []));
+  let changed = false;
+  for (const d of DEFAULT_STATIONS) {
+    if (seeded.has(d.url)) continue;
+    seeded.add(d.url);
+    changed = true;
+    if (!state.stations.some(s => s.url === d.url)) state.stations.push({ id: uid(), name: d.name, url: d.url, fav: true });
+  }
+  if (changed) { store.set('sc.seeded', Array.from(seeded)); saveStations(); }
+}
+
 const audio = $('#audio');
 
 /* ---------- banco local (IndexedDB) para MP3 ---------- */
@@ -864,6 +881,7 @@ $$('[role="tab"]').forEach(b => b.addEventListener('click', () => showTab(b.data
 
 /* ---------- inicialização ---------- */
 async function init() {
+  seedDefaultStations();
   if (state.settings.themeV !== 2) { state.settings.theme = 'verde'; state.settings.themeV = 2; }  // novo visual padrão (uma vez)
   applyAppearance();
   setVolume(state.settings.volume);
