@@ -1,0 +1,34 @@
+AUDIOAPP — rádios online + player de MP3, sem propaganda, com letras grandes
+==============================================================================
+
+COMO PUBLICAR NO cPANEL
+1. No cPanel, abra "Gerenciador de Arquivos".
+2. Crie um subdomínio novo (ex.: audio.cidadaniabasica.com.br) pelo cPanel > Domínios/Subdomínios.
+   Use um subdomínio SEPARADO do FitLite, para não mexer nele.
+3. Envie todos os arquivos desta pasta para a pasta raiz desse subdomínio
+   (index.html, style.css, app.js, sw.js, manifest.webmanifest, icon.svg, icon-*.png).
+4. Garanta que o subdomínio tenha HTTPS (cPanel > SSL/TLS Status > "Run AutoSSL").
+   Sem HTTPS o app não instala na tela inicial.
+5. No celular (Chrome): abra o endereço > menu ⋮ > "Instalar app" / "Adicionar à tela inicial".
+
+COMO USAR
+- Rádios: toque em "+ Adicionar rádio", digite o nome e cole o link da transmissão (stream).
+  Nenhuma rádio vem pré-cadastrada: o app não traz links de terceiros.
+- Músicas: toque em "+ Adicionar músicas" e escolha os MP3 do aparelho. Ficam guardados dentro do app
+  e tocam sem internet. (No PC há também "Adicionar pasta".)
+- Letras: botões A− / A+ no topo. Em Ajustes: negrito, tema Escuro / Claro / Alto contraste, volume.
+- Timer: botão no player pausa o áudio sozinho depois de 15/30/60/90 min.
+- Teclado (PC): Espaço = tocar/pausar; ← → = voltar/avançar 10 s; N = próxima; P = anterior.
+
+LIMITES CONHECIDOS (leia)
+- Link de rádio começando com http:// NÃO toca quando o app está em https://
+  (o navegador bloqueia). Procure o link https da rádio.
+- Algumas rádios não permitem ser tocadas em outros sites (bloqueio no servidor delas); nesse caso o app
+  mostra "Não consegui tocar".
+- Se a própria rádio coloca comerciais dentro da transmissão, o app não consegue removê-los.
+- As músicas MP3 ficam só no aparelho onde foram adicionadas; o backup (Ajustes) guarda apenas
+  a lista de rádios e as preferências de tela, não os MP3.
+- Tocar com a tela bloqueada depende do Android/navegador e da economia de bateria. O app usa os controles
+  de mídia do sistema, mas isso precisa ser testado no seu aparelho.
+- Os dados do app ficam no navegador do aparelho. Limpar "dados do site" apaga rádios e músicas
+  (por isso existe o backup).
