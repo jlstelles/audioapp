@@ -9,6 +9,33 @@
   --u: min(var(--fs), 22px);
 }
 
+/* Verde e preto (padrão) */
+:root[data-theme="verde"] {
+  --bg: #070b08;
+  --panel: #0f1a12;
+  --panel2: #17271c;
+  --text: #f2fff5;
+  --muted: #b9d0bf;
+  --accent: #3ddc84;
+  --accent-text: #04130a;
+  --danger: #ff8a80;
+  --line: #4f7a5c;
+  --focus: #ffd84d;
+}
+/* Laranja e preto */
+:root[data-theme="laranja"] {
+  --bg: #0b0907;
+  --panel: #1a130d;
+  --panel2: #271c12;
+  --text: #fff7ee;
+  --muted: #dac7b0;
+  --accent: #ff9f1c;
+  --accent-text: #1a0e00;
+  --danger: #ff8a80;
+  --line: #8a6234;
+  --focus: #6fe3ff;
+}
+/* Azul */
 :root[data-theme="escuro"] {
   --bg: #0e1116;
   --panel: #181d25;
@@ -18,7 +45,7 @@
   --accent: #5cc8ff;
   --accent-text: #00141f;
   --danger: #ff8a80;
-  --line: #3a4455;
+  --line: #56627a;
   --focus: #ffd84d;
 }
 :root[data-theme="claro"] {
@@ -73,7 +100,8 @@ body {
 :root[data-bold="1"] .chip,
 :root[data-bold="1"] .list .name { font-weight: 800; }
 
-button, input, dialog { font: inherit; color: inherit; }
+button, input, select, dialog { font: inherit; color: inherit; }
+select, option { color: var(--text); background: var(--bg); }
 
 :focus-visible {
   outline: 4px solid var(--focus);
@@ -354,6 +382,35 @@ input[type="range"]::-moz-range-thumb {
   .ctl.big { min-height: 2.9em; }
   .now-sub { display: none; }
 }
+
+/* Busca de rádios */
+select {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0.4rem 0.7rem;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  font-size: min(1rem, 30px);
+}
+.check { display: flex; align-items: center; gap: 0.6rem; font-size: min(0.9rem, 24px); }
+.check input { width: 1.6em; height: 1.6em; flex: 0 0 auto; accent-color: var(--accent); }
+.tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.tags button {
+  min-height: 2.7em;
+  padding: 0.2em 0.9em;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel2);
+  font-size: min(0.85rem, 22px);
+  font-weight: 700;
+  cursor: pointer;
+}
+.tags button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+.item .meta { display: block; font-size: min(0.8rem, 20px); color: var(--muted); margin-top: 0.15rem; }
+.item .pad { padding: 0.3rem 0.4rem; }
+#searchDialog { max-height: 92vh; max-height: 92dvh; overflow-y: auto; }
+#searchDialog .list { margin-top: 0.8rem; }
 
 /* Diálogos */
 dialog {

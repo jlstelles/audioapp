@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pt-BR" data-theme="escuro">
+<html lang="pt-BR" data-theme="verde">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0e1116">
+<meta name="theme-color" content="#070b08">
 <meta name="description" content="Rádios online e músicas MP3 em um só lugar, sem propaganda, com letras grandes.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -31,7 +31,8 @@
 
   <section id="tab-radios" role="tabpanel" aria-labelledby="t-radios">
     <div class="toolbar">
-      <button type="button" class="btn primary" id="addStation">+ Adicionar rádio</button>
+      <button type="button" class="btn primary" id="searchStations">Buscar rádios na internet</button>
+      <button type="button" class="btn" id="addStation">+ Adicionar pelo link</button>
     </div>
     <ul class="list" id="stationList"></ul>
   </section>
@@ -69,7 +70,9 @@
     <div class="card">
       <h2>Cores</h2>
       <div class="row" id="themeRow">
-        <button type="button" class="btn" data-theme-set="escuro" aria-pressed="true">Escuro</button>
+        <button type="button" class="btn" data-theme-set="verde" aria-pressed="true">Verde</button>
+        <button type="button" class="btn" data-theme-set="laranja" aria-pressed="false">Laranja</button>
+        <button type="button" class="btn" data-theme-set="escuro" aria-pressed="false">Azul</button>
         <button type="button" class="btn" data-theme-set="claro" aria-pressed="false">Claro</button>
         <button type="button" class="btn" data-theme-set="contraste" aria-pressed="false">Alto contraste</button>
       </div>
@@ -156,6 +159,47 @@
       <button type="button" class="btn" id="stCancel">Cancelar</button>
       <button type="submit" class="btn primary" id="stSave">Salvar</button>
     </div>
+  </form>
+</dialog>
+
+<dialog id="searchDialog" aria-labelledby="searchTitle">
+  <form id="searchForm" method="dialog" novalidate>
+    <h2 id="searchTitle">Buscar rádios</h2>
+    <label class="field" for="sQuery">
+      <span>Nome da rádio (vazio = as mais ouvidas)</span>
+      <input type="search" id="sQuery" autocomplete="off" placeholder="Ex.: paraíso">
+    </label>
+    <label class="field" for="sCountry">
+      <span>País</span>
+      <select id="sCountry">
+        <option value="BR" selected>Brasil</option>
+        <option value="UY">Uruguai</option>
+        <option value="AR">Argentina</option>
+        <option value="PT">Portugal</option>
+        <option value="US">Estados Unidos</option>
+        <option value="">Todos os países</option>
+      </select>
+    </label>
+    <div class="tags" id="sTags" role="group" aria-label="Estilo musical">
+      <button type="button" data-tag="rock" aria-pressed="false">Rock</button>
+      <button type="button" data-tag="mpb" aria-pressed="false">MPB</button>
+      <button type="button" data-tag="pop" aria-pressed="false">Pop</button>
+      <button type="button" data-tag="jazz" aria-pressed="false">Jazz</button>
+      <button type="button" data-tag="instrumental" aria-pressed="false">Instrumental</button>
+      <button type="button" data-tag="classical" aria-pressed="false">Clássica</button>
+      <button type="button" data-tag="sertanejo" aria-pressed="false">Sertanejo</button>
+      <button type="button" data-tag="news" aria-pressed="false">Notícias</button>
+    </div>
+    <label class="check" for="sHttps">
+      <input type="checkbox" id="sHttps" checked>
+      <span>Só links https (os que tocam neste app)</span>
+    </label>
+    <div class="row">
+      <button type="button" class="btn" id="sClose">Fechar</button>
+      <button type="submit" class="btn primary" id="sGo">Buscar</button>
+    </div>
+    <p class="note" id="sStatus" aria-live="polite"></p>
+    <ul class="list" id="sResults"></ul>
   </form>
 </dialog>
 

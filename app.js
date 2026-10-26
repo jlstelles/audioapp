@@ -12,7 +12,7 @@ const store = {
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2));
 
 const FONT_SIZES = [18, 21, 24, 28, 33, 40];
-const THEME_COLORS = { escuro: '#0e1116', claro: '#ffffff', contraste: '#000000' };
+const THEME_COLORS = { verde: '#070b08', laranja: '#0b0907', escuro: '#0e1116', claro: '#ffffff', contraste: '#000000' };
 
 const ICON = {
   play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
@@ -27,9 +27,10 @@ const ICON = {
 const state = {
   stations: store.get('sc.stations', []),
   settings: Object.assign(
-    { fs: 2, theme: 'escuro', bold: true, volume: 1, shuffle: false, repeat: 'all', tab: 'radios' },
+    { fs: 2, theme: 'verde', themeV: 0, bold: true, volume: 1, shuffle: false, repeat: 'all', tab: 'radios' },
     store.get('sc.settings', {})
   ),
+  previewStation: null, // rádio em prévia (vinda da busca, ainda não salva)
   tracks: [],         // [{id, name, size}]
   now: null,          // {type:'radio'|'mp3', id}
   editingId: null,
@@ -175,7 +176,7 @@ function renderStations() {
   const ul = $('#stationList');
   const list = sortedStations();
   if (!list.length) {
-    ul.innerHTML = '<li class="empty">Nenhuma rádio cadastrada ainda.<br>Toque em “+ Adicionar rádio” e informe o nome e o link da transmissão.</li>';
+    ul.innerHTML = '<li class="empty">Nenhuma rádio cadastrada ainda.<br>Toque em “Buscar rádios na internet” para encontrar e adicionar, ou em “+ Adicionar pelo link”.</li>';
     return;
   }
   ul.innerHTML = list.map(s => {
@@ -242,7 +243,9 @@ function fmt(t) {
 function setStatus(msg) { $('#nowSub').textContent = msg; }
 
 function currentStation() {
-  return state.now && state.now.type === 'radio' ? state.stations.find(s => s.id === state.now.id) : null;
+  if (!state.now || state.now.type !== 'radio') return null;
+  return state.stations.find(s => s.id === state.now.id) ||
+    (state.previewStation && state.previewStation.id === state.now.id ? state.previewStation : null);
 }
 function currentTrack() {
   return state.now && state.now.type === 'mp3' ? state.tracks.find(t => t.id === state.now.id) : null;
@@ -311,6 +314,16 @@ function startPlayback() {
 function playRadio(id) {
   const st = state.stations.find(s => s.id === id);
   if (!st) return;
+  startRadio(st);
+}
+
+function playPreview(st) {
+  state.previewStation = { id: 'preview:' + st.uuid, name: st.name, url: st.url };
+  startRadio(state.previewStation);
+}
+
+function startRadio(st) {
+  const id = st.id;
   state.now = { type: 'radio', id };
   state.retries = 0;
   releaseObjectUrl();
@@ -565,6 +578,140 @@ $('#stationForm').addEventListener('submit', e => {
   updatePlayerUI();
 });
 
+
+/* ---------- busca de rádios na internet (diretório público Radio Browser) ---------- */
+// Servidores do diretório. Tenta em ordem e lembra o primeiro que responder.
+const RB_HOSTS = ['de1.api.radio-browser.info', 'de2.api.radio-browser.info', 'fi1.api.radio-browser.info', 'nl1.api.radio-browser.info', 'all.api.radio-browser.info'];
+
+async function rbFetch(path) {
+  const saved = store.get('sc.rbhost', null);
+  const hosts = saved ? [saved].concat(RB_HOSTS.filter(h => h !== saved)) : RB_HOSTS;
+  let lastErr = new Error('sem servidor');
+  for (const h of hosts) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 9000);
+    try {
+      const r = await fetch('https://' + h + path, { signal: ctl.signal });
+      clearTimeout(timer);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const data = await r.json();
+      store.set('sc.rbhost', h);
+      return data;
+    } catch (e) { clearTimeout(timer); lastErr = e; }
+  }
+  throw lastErr;
+}
+
+const search = { tag: '', results: [] };
+const sDlg = $('#searchDialog');
+
+function openSearch() {
+  sDlg.showModal();
+  if (!search.results.length && !$('#sResults').children.length) runSearch();
+  $('#sQuery').focus();
+}
+
+function normalizeStation(r) {
+  const url = String(r.url_resolved || r.url || '').trim();
+  const name = String(r.name || '').replace(/\s+/g, ' ').trim();
+  if (!name || !/^https?:\/\/\S+$/i.test(url)) return null;
+  return {
+    uuid: String(r.stationuuid || url),
+    name: name.slice(0, 120),
+    url,
+    meta: [r.countrycode, [r.codec, r.bitrate ? r.bitrate + ' kbps' : ''].filter(Boolean).join(' '), String(r.tags || '').split(',').map(t => t.trim()).filter(Boolean).slice(0, 3).join(', ')]
+      .filter(Boolean).join(' · ')
+  };
+}
+
+async function runSearch() {
+  const q = $('#sQuery').value.trim();
+  const params = new URLSearchParams({ hidebroken: 'true', order: 'clickcount', reverse: 'true', limit: '100' });
+  if (q) params.set('name', q);
+  if (search.tag) params.set('tag', search.tag);
+  const cc = $('#sCountry').value;
+  if (cc) params.set('countrycode', cc);
+  const onlyHttps = $('#sHttps').checked;
+  const status = $('#sStatus');
+  status.textContent = 'Buscando…';
+  $('#sGo').disabled = true;
+  try {
+    const raw = await rbFetch('/json/stations/search?' + params.toString());
+    const seen = new Set();
+    const list = [];
+    for (const r of Array.isArray(raw) ? raw : []) {
+      const s = normalizeStation(r);
+      if (!s || seen.has(s.url)) continue;
+      if (onlyHttps && location.protocol === 'https:' && !/^https:/i.test(s.url)) continue;
+      seen.add(s.url);
+      list.push(s);
+      if (list.length >= 40) break;
+    }
+    search.results = list;
+    status.textContent = list.length
+      ? `${list.length} rádio${list.length > 1 ? 's' : ''} encontrada${list.length > 1 ? 's' : ''}, da mais ouvida para a menos.`
+      : 'Nenhuma rádio encontrada. Tente outro nome, outro país ou desmarque “só https”.';
+    renderSearchResults();
+  } catch (e) {
+    search.results = [];
+    $('#sResults').innerHTML = '';
+    status.textContent = 'Não consegui acessar o diretório de rádios agora. Verifique a internet e tente de novo; ou adicione a rádio pelo link.';
+  } finally {
+    $('#sGo').disabled = false;
+  }
+}
+
+function renderSearchResults() {
+  const have = new Set(state.stations.map(s => s.url));
+  $('#sResults').innerHTML = search.results.map((s, i) => {
+    const added = have.has(s.url);
+    return `<li class="item" data-i="${i}">
+      <div class="pad"><span class="name">${esc(s.name)}</span><span class="meta">${esc(s.meta)}</span></div>
+      <div class="acts">
+        <button type="button" data-act="preview">▶ Ouvir</button>
+        <button type="button" data-act="add" ${added ? 'disabled' : ''}>${added ? '✓ Já adicionada' : '+ Adicionar'}</button>
+      </div>
+    </li>`;
+  }).join('');
+}
+
+$('#searchStations').addEventListener('click', openSearch);
+$('#sClose').addEventListener('click', () => sDlg.close());
+$('#searchForm').addEventListener('submit', e => { e.preventDefault(); runSearch(); });
+$('#sCountry').addEventListener('change', runSearch);
+$('#sHttps').addEventListener('change', runSearch);
+$('#sTags').addEventListener('click', e => {
+  const b = e.target.closest('button[data-tag]');
+  if (!b) return;
+  const same = search.tag === b.dataset.tag;
+  search.tag = same ? '' : b.dataset.tag;
+  $$('#sTags button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.tag === search.tag)));
+  runSearch();
+});
+$('#sResults').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-act]');
+  if (!btn || btn.disabled) return;
+  const s = search.results[Number(btn.closest('.item').dataset.i)];
+  if (!s) return;
+  if (btn.dataset.act === 'preview') {
+    playPreview(s);
+  } else if (btn.dataset.act === 'add') {
+    if (!state.stations.some(x => x.url === s.url)) {
+      const id = uid();
+      state.stations.push({ id, name: s.name, url: s.url, fav: false });
+      saveStations();
+      // se esta rádio está tocando como prévia, passa a ser a rádio salva
+      if (state.previewStation && state.now && state.now.id === state.previewStation.id && state.previewStation.url === s.url) {
+        state.now = { type: 'radio', id };
+        state.previewStation = null;
+      }
+      toast(`“${s.name}” adicionada às suas rádios.`);
+      updatePlayerUI();
+      renderSearchResults();
+    }
+  }
+});
+
 /* ---------- músicas ---------- */
 $('#addFiles').addEventListener('click', () => $('#fileInput').click());
 $('#addFolder').addEventListener('click', () => $('#folderInput').click());
@@ -717,6 +864,7 @@ $$('[role="tab"]').forEach(b => b.addEventListener('click', () => showTab(b.data
 
 /* ---------- inicialização ---------- */
 async function init() {
+  if (state.settings.themeV !== 2) { state.settings.theme = 'verde'; state.settings.themeV = 2; }  // novo visual padrão (uma vez)
   applyAppearance();
   setVolume(state.settings.volume);
   showTab(['radios', 'musicas', 'ajustes'].includes(state.settings.tab) ? state.settings.tab : 'radios');

@@ -1,6 +1,6 @@
 /* Service worker do AudioApp: guarda só os arquivos do próprio app.
    Nunca intercepta áudio, transmissões de rádio nem pedidos de outros sites. */
-const CACHE = 'audioapp-v1';
+const CACHE = 'audioapp-v2';
 const SHELL = [
   './', './index.html', './style.css', './app.js', './manifest.webmanifest',
   './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png'

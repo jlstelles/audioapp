@@ -12,8 +12,11 @@ COMO PUBLICAR NO cPANEL
 5. No celular (Chrome): abra o endereço > menu ⋮ > "Instalar app" / "Adicionar à tela inicial".
 
 COMO USAR
-- Rádios: toque em "+ Adicionar rádio", digite o nome e cole o link da transmissão (stream).
-  Nenhuma rádio vem pré-cadastrada: o app não traz links de terceiros.
+- Rádios: toque em "Buscar rádios na internet" para procurar por nome, país ou estilo; use "Ouvir" para
+  testar e "+ Adicionar" para guardar na sua lista. A busca usa o diretório público Radio Browser
+  (precisa de internet). Também dá para "+ Adicionar pelo link" (nome + link da transmissão).
+  Nenhuma rádio vem pré-cadastrada.
+- Cores: em Ajustes, escolha Verde (padrão), Laranja, Azul, Claro ou Alto contraste.
 - Músicas: toque em "+ Adicionar músicas" e escolha os MP3 do aparelho. Ficam guardados dentro do app
   e tocam sem internet. (No PC há também "Adicionar pasta".)
 - Letras: botões A− / A+ no topo. Em Ajustes: negrito, tema Escuro / Claro / Alto contraste, volume.
@@ -23,6 +26,8 @@ COMO USAR
 LIMITES CONHECIDOS (leia)
 - Link de rádio começando com http:// NÃO toca quando o app está em https://
   (o navegador bloqueia). Procure o link https da rádio.
+- A busca depende do diretório Radio Browser estar no ar; se ele falhar, o app avisa e você ainda pode
+  adicionar rádios pelo link. Os resultados são de terceiros: o app não garante que a rádio esteja no ar.
 - Algumas rádios não permitem ser tocadas em outros sites (bloqueio no servidor delas); nesse caso o app
   mostra "Não consegui tocar".
 - Se a própria rádio coloca comerciais dentro da transmissão, o app não consegue removê-los.
